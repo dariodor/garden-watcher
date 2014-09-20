@@ -10,13 +10,13 @@
 #include <Xively.h>
 
 // Number of analog pins connect to sensors
-#define PINS 4
+#define PINS 5
 
 // Analog pin which we're monitoring (0 and 1 are used by the Ethernet/WiFi shield)
 // Pins and relative display name
 const char readPins[2][PINS] = { 
-  {'A2','A3','A4','A5'},
-  {'blueMoisture','greenMoisture','orangeMoisture','light'}
+  {'A1','A2','A3','A4','A5'},
+  {'temperature','blueMoisture','greenMoisture','orangeMoisture','light'}
 };
 
 // for variable
@@ -39,20 +39,22 @@ char xivelyKey[] = "";
 #define xivelyFeed 1743234869
 
 // Datastreams
+char temperatureId[] = "temperature";
 char blueId[] = "blue";
 char greenId[] = "green";
 char orangeId[] = "orange";
 char lightId[] = "light";
 
 // Number of datastreams
-byte datastreamsNumber = 4;
+byte datastreamsNumber = 5;
 
 // Define the strings for our datastream IDs
 XivelyDatastream datastreams[] = {
   XivelyDatastream(blueId, strlen(blueId), DATASTREAM_FLOAT),
   XivelyDatastream(greenId, strlen(greenId), DATASTREAM_FLOAT),
   XivelyDatastream(orangeId, strlen(orangeId), DATASTREAM_FLOAT),
-  XivelyDatastream(lightId, strlen(lightId), DATASTREAM_FLOAT)
+  XivelyDatastream(lightId, strlen(lightId), DATASTREAM_FLOAT),
+  XivelyDatastream(temperatureId, strlen(temperatureId), DATASTREAM_FLOAT)
 };
 // Finally, wrap the datastreams into a feed
 XivelyFeed feed(xivelyFeed, datastreams, datastreamsNumber /* number of datastreams */);
@@ -85,6 +87,10 @@ void setup() {
   for(k=0; k<PINS; k++){
     pinMode(readPins[0][k], INPUT);
   }
+
+  pinMode(8, OUTPUT);  // transistor on-off
+  pinMode(9, OUTPUT);  // transistor on-off
+  pinMode(10, OUTPUT);  // transistor on-off
   
   Serial.println("Starting single datastream upload to Xively...");
   Serial.println();
@@ -102,6 +108,10 @@ void setup() {
 }
 
 void loop() {
+
+  digitalWrite(8, HIGH);   // sets the Transistor on
+  digitalWrite(9, HIGH);   // sets the Transistor on
+  digitalWrite(10, HIGH);   // sets the Transistor on
   
   for(k=0; k<PINS; k++){
     //read sensor values
@@ -114,6 +124,10 @@ void loop() {
     Serial.print(" sensor value ");
     Serial.println(datastreams[k].getFloat());
   }
+
+  digitalWrite(8, LOW);    // sets the Transistor off
+  digitalWrite(9, LOW);    // sets the Transistor off
+  digitalWrite(10, LOW);    // sets the Transistor off
 
   //send value to xively
   Serial.println("Uploading it to Xively");
