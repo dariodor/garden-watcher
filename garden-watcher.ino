@@ -13,22 +13,52 @@
 const int PINS = 5;
 
 // Analog pin which we're monitoring (0 and 1 are used by the Ethernet/WiFi shield)
-// Pins and relative display name
 
-int readPins[PINS] = { 
-  A1,A2,A3,A4,A5
+class analogSensor {
+  public:
+    analogSensor(char name, char pin, int type);
+    char name();
+    int read();
+    int type();
+  private:
+    char _name;
+    char _pin;
+    int _type;  // type of sensor (1-resistance, 2-...)
 };
 
-const char* titlePins[PINS] = { 
-  "temperature","blueMoisture","greenMoisture","orangeMoisture","light"
-};
+analogSensor::analogSensor(char name, char pin, int type) {
+  pinMode(pin, INPUT);
+  _name = name;
+  _pin = pin;
+  _type = type;
+}
 
-/*
-const char* readPins[2][5] = { 
-  {"A1","A2","A3","A4","A5"},
-  {"temperature","blueMoisture","greenMoisture","orangeMoisture","light"}
+char analogSensor::name() {
+  return _name;
+}
+
+int analogSensor::read() {
+  int value = analogRead(_pin);
+  delay(1);
+  if(analogSensor::type() == 1){
+    // R2 = R1/((Vin/Vout)-1)
+    // Vout = (analog*5)/1024
+    int value = 1000/(5/(((value*5)/1024)-1));
+  }
+  return value;
+}
+
+int analogSensor::type() {
+  return _type;
+}
+
+// Analog sensor pins and relative display name
+analogSensor sensors[] = {
+  analogSensor('blue', 'A2', 1),
+  analogSensor('green', 'A3', 1),
+  analogSensor('orange', 'A4', 1),
+  analogSensor('light', 'A5', 1)
 };
-*/
 
 // for variable
 byte k = 0;
@@ -50,7 +80,7 @@ char xivelyKey[] = "";
 #define xivelyFeed 1743234869
 
 // Datastreams
-char temperatureId[] = "temperature";
+char tempId[] = "temp";
 char blueId[] = "blue";
 char greenId[] = "green";
 char orangeId[] = "orange";
@@ -61,11 +91,11 @@ byte datastreamsNumber = 5;
 
 // Define the strings for our datastream IDs
 XivelyDatastream datastreams[] = {
+  XivelyDatastream(tempId, strlen(tempId), DATASTREAM_FLOAT),
   XivelyDatastream(blueId, strlen(blueId), DATASTREAM_FLOAT),
   XivelyDatastream(greenId, strlen(greenId), DATASTREAM_FLOAT),
   XivelyDatastream(orangeId, strlen(orangeId), DATASTREAM_FLOAT),
-  XivelyDatastream(lightId, strlen(lightId), DATASTREAM_FLOAT),
-  XivelyDatastream(temperatureId, strlen(temperatureId), DATASTREAM_FLOAT)
+  XivelyDatastream(lightId, strlen(lightId), DATASTREAM_FLOAT)
 };
 // Finally, wrap the datastreams into a feed
 XivelyFeed feed(xivelyFeed, datastreams, datastreamsNumber /* number of datastreams */);
@@ -95,13 +125,19 @@ void setup() {
   Serial.begin(9600);
 
   //pins setup
-  for(k=0; k<PINS; k++){
-    pinMode(readPins[k], INPUT);
-  }
+  // for(k=0; k<PINS; k++){
+  //   pinMode(readPins[k], INPUT);
+  // }
 
+  pinMode(A1, INPUT);
+  pinMode(A2, INPUT);
+  pinMode(A3, INPUT);
+  pinMode(A4, INPUT);
+  pinMode(A5, INPUT);
   pinMode(8, OUTPUT);  // transistor on-off
   pinMode(9, OUTPUT);  // transistor on-off
-  pinMode(10, OUTPUT);  // transistor on-off
+  pinMode(6, OUTPUT);  // transistor on-off
+
   
   Serial.println("Starting single datastream upload to Xively...");
   Serial.println();
@@ -119,19 +155,19 @@ void setup() {
 }
 
 void loop() {
-
+  
   digitalWrite(8, HIGH);   // sets the Transistor on
   digitalWrite(9, HIGH);   // sets the Transistor on
   digitalWrite(6, HIGH);   // sets the Transistor on
-  
+
   for(k=0; k<PINS; k++){
     //read sensor values
-    int value = analogRead(readPins[k]);
+    int value = sensors[k].read();
     delay(1);
     datastreams[k].setFloat(value);
     //print the sensor name and relative value
     Serial.print("Read ");
-    Serial.print(titlePins[k]);
+    Serial.print(sensors[k].name());
     Serial.print(" sensor value ");
     Serial.println(datastreams[k].getFloat());
   }
