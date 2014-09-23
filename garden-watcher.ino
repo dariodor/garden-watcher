@@ -122,7 +122,7 @@ void loop() {
 
   digitalWrite(8, HIGH);   // sets the Transistor on
   digitalWrite(9, HIGH);   // sets the Transistor on
-  digitalWrite(10, HIGH);   // sets the Transistor on
+  digitalWrite(6, HIGH);   // sets the Transistor on
   
   for(k=0; k<PINS; k++){
     //read sensor values
@@ -138,7 +138,7 @@ void loop() {
 
   digitalWrite(8, LOW);    // sets the Transistor off
   digitalWrite(9, LOW);    // sets the Transistor off
-  digitalWrite(10, LOW);    // sets the Transistor off
+  digitalWrite(6, LOW);    // sets the Transistor off
 
   //send value to xively
   Serial.println("Uploading it to Xively");
