@@ -16,24 +16,24 @@ const int PINS = 5;
 
 class analogSensor {
   public:
-    analogSensor(char name, char pin, int type);
-    char name();
+    analogSensor(char* name, int pin, int type);
+    char* name();
     int read();
     int type();
   private:
-    char _name;
-    char _pin;
+    char* _name;
+    int _pin;
     int _type;  // type of sensor (1-resistance, 2-...)
 };
 
-analogSensor::analogSensor(char name, char pin, int type) {
+analogSensor::analogSensor(char* name, int pin, int type) {
   pinMode(pin, INPUT);
   _name = name;
   _pin = pin;
   _type = type;
 }
 
-char analogSensor::name() {
+char* analogSensor::name() {
   return _name;
 }
 
@@ -54,10 +54,11 @@ int analogSensor::type() {
 
 // Analog sensor pins and relative display name
 analogSensor sensors[] = {
-  analogSensor('blue', 'A2', 1),
-  analogSensor('green', 'A3', 1),
-  analogSensor('orange', 'A4', 1),
-  analogSensor('light', 'A5', 1)
+  analogSensor("temp", A1, 1),
+  analogSensor("blue", A2, 1),
+  analogSensor("green", A3, 1),
+  analogSensor("orange", A4, 1),
+  analogSensor("light", A5, 1)
 };
 
 // for variable
