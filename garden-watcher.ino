@@ -10,14 +10,25 @@
 #include <Xively.h>
 
 // Number of analog pins connect to sensors
-#define PINS 5
+const int PINS = 5;
 
 // Analog pin which we're monitoring (0 and 1 are used by the Ethernet/WiFi shield)
 // Pins and relative display name
-const char readPins[2][PINS] = { 
-  {'A1','A2','A3','A4','A5'},
-  {'temperature','blueMoisture','greenMoisture','orangeMoisture','light'}
+
+int readPins[PINS] = { 
+  A1,A2,A3,A4,A5
 };
+
+const char* titlePins[PINS] = { 
+  "temperature","blueMoisture","greenMoisture","orangeMoisture","light"
+};
+
+/*
+const char* readPins[2][5] = { 
+  {"A1","A2","A3","A4","A5"},
+  {"temperature","blueMoisture","greenMoisture","orangeMoisture","light"}
+};
+*/
 
 // for variable
 byte k = 0;
@@ -85,7 +96,7 @@ void setup() {
 
   //pins setup
   for(k=0; k<PINS; k++){
-    pinMode(readPins[0][k], INPUT);
+    pinMode(readPins[k], INPUT);
   }
 
   pinMode(8, OUTPUT);  // transistor on-off
@@ -115,12 +126,12 @@ void loop() {
   
   for(k=0; k<PINS; k++){
     //read sensor values
-    int value = analogRead(readPins[0][k]);
+    int value = analogRead(readPins[k]);
     delay(1);
     datastreams[k].setFloat(value);
     //print the sensor name and relative value
     Serial.print("Read ");
-    Serial.print(readPins[1][k]);
+    Serial.print(titlePins[k]);
     Serial.print(" sensor value ");
     Serial.println(datastreams[k].getFloat());
   }
