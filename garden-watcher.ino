@@ -50,7 +50,7 @@ char xivelyKey[] = "";
 #define xivelyFeed 1743234869
 
 // Datastreams
-char temperatureId[] = "temperature";
+char tempId[] = "temp";
 char blueId[] = "blue";
 char greenId[] = "green";
 char orangeId[] = "orange";
@@ -101,7 +101,7 @@ void setup() {
 
   pinMode(8, OUTPUT);  // transistor on-off
   pinMode(9, OUTPUT);  // transistor on-off
-  pinMode(10, OUTPUT);  // transistor on-off
+  pinMode(6, OUTPUT);  // transistor on-off
   
   Serial.println("Starting single datastream upload to Xively...");
   Serial.println();
