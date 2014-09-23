@@ -34,7 +34,8 @@ R2 = R1/((Vin/Vout)-1)
 - Vin = 5v
 - Vout to Arduino board, analogique pin
 
-R2 = R1/((Vout/Vin)-1)
+R2[Ω] = R1/((Vout/Vin)-1)
+R2[Ω] = R1/((((Vin*analogValue)/1024)/Vin)-1)
 
 **Temp sensor**
 
@@ -44,7 +45,7 @@ R2 = R1/((Vout/Vin)-1)
 - R1 = 2kΩ
 - Vout to Arduino board, analogique pin
 
-
+Temp[°C] = ((Vin*analogValue)/1024)*100
 
 ### What to do next?
 
