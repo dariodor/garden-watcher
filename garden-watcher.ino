@@ -9,37 +9,40 @@
 #include <HttpClient.h>
 #include <Xively.h>
 
-// Pins
+// Pins (pins 13,12,11,10,7,4 are used by the Ethernet/WiFi shield)
 const byte outPin1 = 6;
-const byte outPin2 = 8;
-const byte outPin3 = 9;
+const byte outPin2 = 9;
+const byte outPin3 = 8;
 const int inPin1 = A1;
 const int inPin2 = A2;
 const int inPin3 = A3;
 const int inPin4 = A4;
 const int inPin5 = A5;
 
-// Number of analog pins connect to sensors
+// Number of analog pins connect to sensors and number of datastreams
 const int sensorPinsToDatastreams = 5;
 
-// Analog pin which we're monitoring (0 and 1 are used by the Ethernet/WiFi shield)
+/* Classes */
 
+// analogSensor Class
 class analogSensor {
   public:
-    analogSensor(char* name, int pin, int type);
+    analogSensor(char* name, int pin, int controlPin, int type);
     char* name();
     int read();
+    int setup();
     int type();
   private:
     char* _name;
     int _pin;
+    int _controlPin;
     int _type;  // type of sensor (1-resistance, 2-...)
 };
 
-analogSensor::analogSensor(char* name, int pin, int type) {
-  pinMode(pin, INPUT);
+analogSensor::analogSensor(char* name, int pin, int controlPin, int type) {
   _name = name;
   _pin = pin;
+  _controlPin = controlPin;
   _type = type;
 }
 
@@ -49,39 +52,57 @@ char* analogSensor::name() {
 
 int analogSensor::read() {
   int vIn = 4.8;
-  int value = analogRead(_pin);
-  delay(1);
+  int value = 0;
+
   if(analogSensor::type() == 1){
     vIn = vIn - 0.7;  // transistor Vce
+    digitalWrite(outPin1, HIGH);   // sets the Transistor on
+    value = analogRead(_pin);
+    delay(1);
+    digitalWrite(outPin1, LOW);   // sets the Transistor on
     // R2 = R1/((Vin/Vout)-1)
     // Vout = (analogValue*vIn)/1024
     // R2[Ω] = R1/((((Vin*analogValue)/1024)/Vin)-1)
     value = 1000/((((vIn*value)/1024)/vIn)-1);
   }
   else if (analogSensor::type() == 2){
+    int value = analogRead(_pin);
+    delay(1);
     // R2 = R1/((Vin/Vout)-1)
     // Vout = (analogValue*vIn)/1024
     // R2[Ω] = R1/((((Vin*analogValue)/1024)/Vin)-1)
     value = 1000/((((vIn*value)/1024)/vIn)-1);
   }
   else if (analogSensor::type() == 3){
+    int value = analogRead(_pin);
+    delay(1);
     // Temp[°C] = ((Vin*analogValue)/1024)*100
     value = ((vIn*value)/1024)*100;
   }
   return value;
 }
 
+int analogSensor::setup() {
+  // pins setup
+  pinMode(_pin, INPUT);
+  if(_type == 1){
+    pinMode(_controlPin, OUTPUT);  // transistor on-off
+  }
+}
+
 int analogSensor::type() {
   return _type;
 }
 
-// Analog sensor pins and relative display name
+/* Sensors */
+
+// Analog sensors "name of sensor", input pin, control pin, type of sensor
 analogSensor sensors[] = {
-  analogSensor("temp", inPin1, 3),
-  analogSensor("blue", inPin2, 1),
-  analogSensor("green", inPin3, 1),
-  analogSensor("orange", inPin4, 1),
-  analogSensor("light", inPin5, 2)
+  analogSensor("temp", inPin1, 0, 3),
+  analogSensor("blue", inPin2, outPin1, 1),
+  analogSensor("green", inPin3, outPin2, 1),
+  analogSensor("orange", inPin4, outPin3, 1),
+  analogSensor("light", inPin5, 0, 2)
 };
 
 // for variable
@@ -148,20 +169,9 @@ void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
 
-  //pins setup
-  // for(k=0; k<sensorPinsToDatastreams; k++){
-  //   pinMode(readPins[k], INPUT);
-  // }
-
-  pinMode(inPin1, INPUT);
-  pinMode(inPin2, INPUT);
-  pinMode(inPin3, INPUT);
-  pinMode(inPin4, INPUT);
-  pinMode(inPin5, INPUT);
-  pinMode(outPin1, OUTPUT);  // transistor on-off
-  pinMode(outPin2, OUTPUT);  // transistor on-off
-  pinMode(outPin3, OUTPUT);  // transistor on-off
-
+  for(k=0; k<sensorPinsToDatastreams; k++){
+    int value = sensors[k].setup();
+  }
   
   Serial.println("Starting single datastream upload to Xively...");
   Serial.println();
@@ -179,15 +189,10 @@ void setup() {
 }
 
 void loop() {
-  
-  digitalWrite(outPin1, HIGH);   // sets the Transistor on
-  digitalWrite(outPin2, HIGH);   // sets the Transistor on
-  digitalWrite(outPin3, HIGH);   // sets the Transistor on
 
   for(k=0; k<sensorPinsToDatastreams; k++){
     //read sensor values
     int value = sensors[k].read();
-    delay(1);
     datastreams[k].setFloat(value);
     //print the sensor name and relative value
     Serial.print("Read ");
@@ -195,10 +200,6 @@ void loop() {
     Serial.print(" sensor value ");
     Serial.println(datastreams[k].getFloat());
   }
-
-  digitalWrite(outPin1, LOW);    // sets the Transistor off
-  digitalWrite(outPin2, LOW);    // sets the Transistor off
-  digitalWrite(outPin3, LOW);    // sets the Transistor off
 
   //send value to xively
   Serial.println("Uploading it to Xively");
