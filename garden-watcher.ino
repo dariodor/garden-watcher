@@ -43,7 +43,12 @@ int analogSensor::read() {
   if(analogSensor::type() == 1){
     // R2 = R1/((Vin/Vout)-1)
     // Vout = (analog*5)/1024
-    int value = 1000/(5/(((value*5)/1024)-1));
+    // R2[Ω] = R1/((((Vin*analogValue)/1024)/Vin)-1)
+    value = 1000/((((5*value)/1024)/5)-1);
+  }
+  else if (analogSensor::type() == 2){
+    // Temp[°C] = ((Vin*analogValue)/1024)*100
+    value = ((5*value)/1024)*100;
   }
   return value;
 }
@@ -54,11 +59,11 @@ int analogSensor::type() {
 
 // Analog sensor pins and relative display name
 analogSensor sensors[] = {
-  analogSensor("temp", A1, 1),
+  analogSensor("temp", A1, 2),
   analogSensor("blue", A2, 1),
   analogSensor("green", A3, 1),
   analogSensor("orange", A4, 1),
-  analogSensor("light", A5, 1)
+  analogSensor("light", A5, 3)
 };
 
 // for variable
