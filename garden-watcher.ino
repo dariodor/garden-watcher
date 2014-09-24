@@ -9,8 +9,18 @@
 #include <HttpClient.h>
 #include <Xively.h>
 
+// Pins
+const byte outPin1 = 6;
+const byte outPin2 = 8;
+const byte outPin3 = 9;
+const int inPin1 = A1;
+const int inPin2 = A2;
+const int inPin3 = A3;
+const int inPin4 = A4;
+const int inPin5 = A5;
+
 // Number of analog pins connect to sensors
-const int PINS = 5;
+const int sensorPinsToDatastreams = 5;
 
 // Analog pin which we're monitoring (0 and 1 are used by the Ethernet/WiFi shield)
 
@@ -67,11 +77,11 @@ int analogSensor::type() {
 
 // Analog sensor pins and relative display name
 analogSensor sensors[] = {
-  analogSensor("temp", A1, 3),
-  analogSensor("blue", A2, 1),
-  analogSensor("green", A3, 1),
-  analogSensor("orange", A4, 1),
-  analogSensor("light", A5, 2)
+  analogSensor("temp", inPin1, 3),
+  analogSensor("blue", inPin2, 1),
+  analogSensor("green", inPin3, 1),
+  analogSensor("orange", inPin4, 1),
+  analogSensor("light", inPin5, 2)
 };
 
 // for variable
@@ -139,18 +149,18 @@ void setup() {
   Serial.begin(9600);
 
   //pins setup
-  // for(k=0; k<PINS; k++){
+  // for(k=0; k<sensorPinsToDatastreams; k++){
   //   pinMode(readPins[k], INPUT);
   // }
 
-  pinMode(A1, INPUT);
-  pinMode(A2, INPUT);
-  pinMode(A3, INPUT);
-  pinMode(A4, INPUT);
-  pinMode(A5, INPUT);
-  pinMode(8, OUTPUT);  // transistor on-off
-  pinMode(9, OUTPUT);  // transistor on-off
-  pinMode(6, OUTPUT);  // transistor on-off
+  pinMode(inPin1, INPUT);
+  pinMode(inPin2, INPUT);
+  pinMode(inPin3, INPUT);
+  pinMode(inPin4, INPUT);
+  pinMode(inPin5, INPUT);
+  pinMode(outPin1, OUTPUT);  // transistor on-off
+  pinMode(outPin2, OUTPUT);  // transistor on-off
+  pinMode(outPin3, OUTPUT);  // transistor on-off
 
   
   Serial.println("Starting single datastream upload to Xively...");
@@ -170,11 +180,11 @@ void setup() {
 
 void loop() {
   
-  digitalWrite(8, HIGH);   // sets the Transistor on
-  digitalWrite(9, HIGH);   // sets the Transistor on
-  digitalWrite(6, HIGH);   // sets the Transistor on
+  digitalWrite(outPin1, HIGH);   // sets the Transistor on
+  digitalWrite(outPin2, HIGH);   // sets the Transistor on
+  digitalWrite(outPin3, HIGH);   // sets the Transistor on
 
-  for(k=0; k<PINS; k++){
+  for(k=0; k<sensorPinsToDatastreams; k++){
     //read sensor values
     int value = sensors[k].read();
     delay(1);
@@ -186,9 +196,9 @@ void loop() {
     Serial.println(datastreams[k].getFloat());
   }
 
-  digitalWrite(8, LOW);    // sets the Transistor off
-  digitalWrite(9, LOW);    // sets the Transistor off
-  digitalWrite(6, LOW);    // sets the Transistor off
+  digitalWrite(outPin1, LOW);    // sets the Transistor off
+  digitalWrite(outPin2, LOW);    // sets the Transistor off
+  digitalWrite(outPin3, LOW);    // sets the Transistor off
 
   //send value to xively
   Serial.println("Uploading it to Xively");
