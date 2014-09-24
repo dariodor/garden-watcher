@@ -38,17 +38,25 @@ char* analogSensor::name() {
 }
 
 int analogSensor::read() {
+  int vIn = 4.8;
   int value = analogRead(_pin);
   delay(1);
   if(analogSensor::type() == 1){
+    vIn = vIn - 0.7;  // transistor Vce
     // R2 = R1/((Vin/Vout)-1)
-    // Vout = (analog*5)/1024
+    // Vout = (analogValue*vIn)/1024
     // R2[Ω] = R1/((((Vin*analogValue)/1024)/Vin)-1)
-    value = 1000/((((5*value)/1024)/5)-1);
+    value = 1000/((((vIn*value)/1024)/vIn)-1);
   }
   else if (analogSensor::type() == 2){
+    // R2 = R1/((Vin/Vout)-1)
+    // Vout = (analogValue*vIn)/1024
+    // R2[Ω] = R1/((((Vin*analogValue)/1024)/Vin)-1)
+    value = 1000/((((vIn*value)/1024)/vIn)-1);
+  }
+  else if (analogSensor::type() == 3){
     // Temp[°C] = ((Vin*analogValue)/1024)*100
-    value = ((5*value)/1024)*100;
+    value = ((vIn*value)/1024)*100;
   }
   return value;
 }
@@ -59,11 +67,11 @@ int analogSensor::type() {
 
 // Analog sensor pins and relative display name
 analogSensor sensors[] = {
-  analogSensor("temp", A1, 2),
+  analogSensor("temp", A1, 3),
   analogSensor("blue", A2, 1),
   analogSensor("green", A3, 1),
   analogSensor("orange", A4, 1),
-  analogSensor("light", A5, 3)
+  analogSensor("light", A5, 2)
 };
 
 // for variable
