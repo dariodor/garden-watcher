@@ -29,8 +29,8 @@ class analogSensor {
   public:
     analogSensor(char* name, int pin, int controlPin, int type);
     char* name();
-    int read();
-    int setup();
+    float read();
+    void setup();
     int type();
   private:
     char* _name;
@@ -50,31 +50,35 @@ char* analogSensor::name() {
   return _name;
 }
 
-int analogSensor::read() {
+float analogSensor::read() {
   int vIn = 4.8;
-  int value = 0;
-
-  if(analogSensor::type() == 1){
+  float value = 0;
+  if(_type == 1){
     vIn = vIn - 0.7;  // transistor Vce
-    digitalWrite(outPin1, HIGH);   // sets the Transistor on
+    digitalWrite(_controlPin, HIGH);   // sets the Transistor on
     value = analogRead(_pin);
     delay(1);
-    digitalWrite(outPin1, LOW);   // sets the Transistor on
+    digitalWrite(_controlPin, LOW);   // sets the Transistor on
     // R2 = R1/((Vin/Vout)-1)
     // Vout = (analogValue*vIn)/1024
-    // R2[Ω] = R1/((((Vin*analogValue)/1024)/Vin)-1)
-    value = 1000/((((vIn*value)/1024)/vIn)-1);
+    // R2[Ω] = R1/((Vin/((Vin*analogValue)/1024))-1)
+    if(value != 0){
+      value = 1000/((vIn/((vIn*value)/1024))-1);
+    }
+    
   }
-  else if (analogSensor::type() == 2){
-    int value = analogRead(_pin);
+  else if (_type == 2){
+    value = analogRead(_pin);
     delay(1);
-    // R2 = R1/((Vin/Vout)-1)
-    // Vout = (analogValue*vIn)/1024
-    // R2[Ω] = R1/((((Vin*analogValue)/1024)/Vin)-1)
-    value = 1000/((((vIn*value)/1024)/vIn)-1);
+    // R1[Ω] = (((Vin*R2)/Vout)-R2)
+    // Vout = ((analogValue*vIn)/1024)
+    // R1[Ω] = (((vIn*R2)/((analogValue*vIn)/1024))-R2)
+    if(value != 0){
+      value = ((vIn*680)/((value*vIn)/1024))-680;
+    }
   }
-  else if (analogSensor::type() == 3){
-    int value = analogRead(_pin);
+  else if (_type == 3){
+    value = analogRead(_pin);
     delay(1);
     // Temp[°C] = ((Vin*analogValue)/1024)*100
     value = ((vIn*value)/1024)*100;
@@ -82,7 +86,7 @@ int analogSensor::read() {
   return value;
 }
 
-int analogSensor::setup() {
+void analogSensor::setup() {
   // pins setup
   pinMode(_pin, INPUT);
   if(_type == 1){
@@ -170,7 +174,7 @@ void setup() {
   Serial.begin(9600);
 
   for(k=0; k<sensorPinsToDatastreams; k++){
-    int value = sensors[k].setup();
+    sensors[k].setup();
   }
   
   Serial.println("Starting single datastream upload to Xively...");
@@ -189,11 +193,9 @@ void setup() {
 }
 
 void loop() {
-
   for(k=0; k<sensorPinsToDatastreams; k++){
     //read sensor values
-    int value = sensors[k].read();
-    datastreams[k].setFloat(value);
+    datastreams[k].setFloat(sensors[k].read());
     //print the sensor name and relative value
     Serial.print("Read ");
     Serial.print(sensors[k].name());
