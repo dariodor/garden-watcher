@@ -65,7 +65,7 @@ XivelyDatastream datastreams[] = {
   XivelyDatastream(greenId, strlen(greenId), DATASTREAM_FLOAT),
   XivelyDatastream(orangeId, strlen(orangeId), DATASTREAM_FLOAT),
   XivelyDatastream(lightId, strlen(lightId), DATASTREAM_FLOAT),
-  XivelyDatastream(temperatureId, strlen(temperatureId), DATASTREAM_FLOAT)
+  XivelyDatastream(tempId, strlen(tempId), DATASTREAM_FLOAT)
 };
 // Finally, wrap the datastreams into a feed
 XivelyFeed feed(xivelyFeed, datastreams, datastreamsNumber /* number of datastreams */);
