@@ -23,23 +23,24 @@ Garden watcher is a simple way to check your garden state for a better harvest.
 - Transistor BC237A
 - Rb = 150kΩ
 
-R2 = R1/((Vin/Vout)-1)
+R2[Ω] = R1/((Vin/Vout)-1)
 
 **Light sensor**
 
 ![Resistive_divider](http://upload.wikimedia.org/wikipedia/commons/d/db/Resistive_divider.png)
 
-- R1 = 680Ω
-- R2 = moisture sensor
+- R1 = light sensor
+- R2 = 680Ω
 - Vin = 5v
 - Vout to Arduino board, analogique pin
 
-R2[Ω] = R1/((Vout/Vin)-1)
-R2[Ω] = R1/((((Vin*analogValue)/1024)/Vin)-1)
+R1[Ω] = (((Vin*R2)/Vout)-R2)
+
+R1[Ω] = (((vIn*R2)/((analogValue*vIn)/1024))-R2)
 
 **Temp sensor**
 
-![Resistive_divider](http://upload.wikimedia.org/wikipedia/commons/d/db/Resistive_divider.png)
+![Resistive_divider](http://www.learningaboutelectronics.com/images/LM35-temperature-sensor-pinout.png)
 
 - Vin = 5v
 - R1 = 2kΩ
