@@ -14,28 +14,42 @@ Garden watcher is a simple way to check your garden state for a better harvest.
 **Moisture sensor**
 
 ![Resistive_divider](http://upload.wikimedia.org/wikipedia/commons/d/db/Resistive_divider.png)
+![Transistor](http://upload.wikimedia.org/wikipedia/en/3/3b/BJT_bias.png)
 
 - R1 = 1kΩ
 - R2 = moisture sensor
 - Vin = 5v
 - Vout to Arduino board, analogique pin
+- Transistor BC237A
+- Rb = 150kΩ
 
-R2 = R1/((Vin/Vout)-1)
+R2[Ω] = R1/((Vin/Vout)-1)
 
 **Light sensor**
 
 ![Resistive_divider](http://upload.wikimedia.org/wikipedia/commons/d/db/Resistive_divider.png)
 
-- R1 = 680Ω
-- R2 = moisture sensor
+- R1 = light sensor
+- R2 = 680Ω
 - Vin = 5v
 - Vout to Arduino board, analogique pin
 
-R2 = R1/((Vout/Vin)-1)
+R1[Ω] = (((Vin*R2)/Vout)-R2)
+
+R1[Ω] = (((vIn*R2)/((analogValue*vIn)/1024))-R2)
+
+**Temp sensor**
+
+![Resistive_divider](http://www.learningaboutelectronics.com/images/LM35-temperature-sensor-pinout.png)
+
+- Vin = 5v
+- R1 = 2kΩ
+- Vout to Arduino board, analogique pin
+
+Temp[°C] = ((Vin*analogValue)/1024)*100
 
 ### What to do next?
 
-* Temp sensor
 * External panel with full sensors history
 * Electric water valve
 * ADC with I2C for more than 5 sensors
